@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>__PAGE_TITLE__</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#141C17;
+    --ink-soft:#1D271F;
+    --paper:#F1ECDB;
+    --paper-dim:#DCD4B8;
+    --gold:#C98A2C;
+    --gold-bright:#E4A94A;
+    --moss:#4F6F52;
+    --rust:#A9432E;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    background-image:
+      radial-gradient(circle at 15% 15%, rgba(201,138,44,0.07), transparent 40%),
+      radial-gradient(circle at 88% 85%, rgba(79,111,82,0.12), transparent 45%);
+    color:var(--paper);
+    font-family:'IBM Plex Mono', monospace;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:48px 24px;
+  }
+
+  .page{ width:100%; max-width:1240px; }
+
+  header{ margin-bottom:32px; }
+  .eyebrow{
+    font-size:12px; letter-spacing:0.28em; text-transform:uppercase;
+    color:var(--gold); margin:0 0 10px 0;
+  }
+  h1{
+    font-family:'Fraunces', serif; font-weight:600;
+    font-size:clamp(28px, 4.2vw, 44px);
+    line-height:1.06; margin:0 0 12px 0; color:var(--paper);
+    letter-spacing:-0.01em;
+  }
+  header p{
+    max-width:620px; color:var(--paper-dim); font-size:13.5px;
+    line-height:1.65; margin:0;
+  }
+
+  .stage{
+    display:grid;
+    grid-template-columns:1.5fr 1fr;
+    gap:24px;
+    align-items:stretch;
+  }
+  @media (max-width:900px){ .stage{ grid-template-columns:1fr; } }
+
+  /* ---- Left: tree diagram ---- */
+  .diagram-card{
+    position:relative;
+    background:var(--paper);
+    border:1px solid rgba(20,28,23,0.15);
+    border-radius:6px;
+    padding:18px;
+  }
+  .diagram-wrap{ position:relative; width:100%; }
+  svg#treeSvg{ width:100%; height:auto; display:block; color:var(--ink); }
+  svg#treeSvg text{ fill:var(--ink); }
+  svg#treeSvg line{ stroke:#3a3a34 !important; }
+
+  .hotspot{
+    position:absolute;
+    width:22px; height:22px;
+    margin-left:-11px; margin-top:-11px;
+    border-radius:50%;
+    border:2px solid var(--rust);
+    background:rgba(169,67,46,0.16);
+    cursor:pointer;
+    padding:0;
+    opacity:0;
+    transition:transform .16s ease, background .16s ease, box-shadow .16s ease, opacity .16s ease;
+  }
+  .hotspot::after{
+    content:""; display:block; width:6px; height:6px; margin:6px auto 0;
+    border-radius:50%; background:var(--rust);
+  }
+  .hotspot:hover, .hotspot:focus-visible, .hotspot.active{
+    transform:scale(1.3);
+    background:var(--rust);
+    box-shadow:0 0 0 6px rgba(169,67,46,0.16);
+    outline:none;
+    opacity:1;
+  }
+  .hotspot:hover::after, .hotspot:focus-visible::after, .hotspot.active::after{
+    background:var(--paper);
+  }
+
+  .diagram-caption{
+    margin-top:14px; font-size:11px; letter-spacing:0.06em;
+    text-transform:uppercase; color:var(--ink); opacity:0.6;
+    display:flex; align-items:center; gap:8px;
+  }
+  .diagram-caption .dot{
+    width:8px; height:8px; border-radius:50%; background:var(--rust); display:inline-block;
+  }
+
+  /* ---- Right: preview panel ---- */
+  .preview-panel{
+    background:var(--ink-soft);
+    border:1px solid rgba(241,236,219,0.1);
+    color:var(--paper);
+    border-radius:6px;
+    padding:26px;
+    display:flex;
+    flex-direction:column;
+    min-height:420px;
+    position:relative;
+  }
+  .preview-image{
+    width:100%;
+    aspect-ratio:2/1;
+    background:#0F1512;
+    border:1px solid rgba(241,236,219,0.12);
+    border-radius:4px;
+    overflow:hidden;
+    margin-bottom:18px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .preview-image img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .preview-image .placeholder{
+    font-size:11px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--paper-dim); opacity:0.6; text-align:center; padding:0 20px;
+  }
+
+  .preview-index{
+    font-size:11px; letter-spacing:0.14em; color:var(--gold-bright);
+    text-transform:uppercase; margin-bottom:6px;
+  }
+  .preview-title{
+    font-family:'Fraunces', serif; font-weight:600; font-size:24px;
+    margin:0 0 4px 0; line-height:1.1;
+  }
+  .preview-sub{
+    font-style:italic; font-size:13.5px; color:var(--paper-dim);
+    margin:0 0 14px 0;
+  }
+  .preview-desc{
+    font-size:13px; line-height:1.65; color:#C9C2AA; margin:0;
+  }
+  .cursor{
+    display:inline-block; width:7px; height:14px; background:var(--rust);
+    margin-left:2px; animation:blink 1s step-end infinite; vertical-align:text-bottom;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  .legend{
+    margin-top:auto; padding-top:18px; border-top:1px solid rgba(241,236,219,0.1);
+    font-size:10.5px; color:var(--paper-dim); opacity:0.75; line-height:1.6;
+  }
+
+  .time-slider{
+    margin:2px 0 18px 0;
+    display:none;
+  }
+  .time-slider.visible{ display:block; }
+  .time-slider-row{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:6px;
+  }
+  .time-slider-title{
+    font-size:10px; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--moss); opacity:0.9;
+  }
+  .time-slider-age{
+    font-size:12px; color:var(--gold-bright); font-weight:600;
+  }
+  input.time-range{
+    -webkit-appearance:none; appearance:none;
+    width:100%; height:3px;
+    background:rgba(241,236,219,0.18);
+    border-radius:2px;
+    outline:none;
+    accent-color:var(--rust);
+    direction:rtl; /* flips layout: max value (oldest) on the left, min (youngest) on the right */
+  }
+  input.time-range::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none;
+    width:14px; height:14px; border-radius:50%;
+    background:var(--rust);
+    border:2px solid var(--paper);
+    cursor:pointer;
+    margin-top:-1px;
+  }
+  input.time-range::-moz-range-thumb{
+    width:14px; height:14px; border-radius:50%;
+    background:var(--rust);
+    border:2px solid var(--paper);
+    cursor:pointer;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .hotspot, .preview-panel *{ transition:none !important; animation:none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <p class="eyebrow">__EYEBROW__</p>
+    <h1>__TITLE__</h1>
+    <p>__DESCRIPTION__</p>
+  </header>
+
+  <div class="stage">
+
+    <!-- LEFT: tree diagram -->
+    <div class="diagram-card">
+      <div class="diagram-wrap" id="diagramWrap">
+        __TREE_SVG__
+        __HOTSPOTS__
+      </div>
+      <div class="diagram-caption"><span class="dot"></span> __CAPTION_SUMMARY__ — hover or tap a marker to explore</div>
+    </div>
+
+    <!-- RIGHT: preview panel -->
+    <div class="preview-panel" id="panel">
+      <div class="preview-image" id="previewImage">
+        <div class="placeholder">Hover a marked node<br>to load its range map</div>
+      </div>
+      <p class="preview-index" id="previewIndex">Standing by</p>
+      <h2 class="preview-title" id="previewTitle">Select a node<span class="cursor"></span></h2>
+      <p class="preview-sub" id="previewSub"></p>
+      <div class="time-slider" id="timeSlider">
+        <div class="time-slider-row">
+          <span class="time-slider-title">Along the branch</span>
+          <span class="time-slider-age" id="timeAge"></span>
+        </div>
+        <input type="range" class="time-range" id="timeRange" min="0" max="0" step="1" value="0">
+      </div>
+      <p class="preview-desc" id="previewDesc">Range maps are the posterior probability surface for each node's estimated geographic origin, plotted on a world basemap.</p>
+      <div class="legend">Warm colors (red/orange) mark higher posterior probability; cool colors (blue) mark lower probability within the estimated range.</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+__NODE_DATA__
+
+  const previewImage = document.getElementById('previewImage');
+  const previewIndex = document.getElementById('previewIndex');
+  const previewTitle = document.getElementById('previewTitle');
+  const previewSub = document.getElementById('previewSub');
+  const previewDesc = document.getElementById('previewDesc');
+  const hotspots = document.querySelectorAll('.hotspot');
+  const timeSlider = document.getElementById('timeSlider');
+  const timeRange = document.getElementById('timeRange');
+  const timeAge = document.getElementById('timeAge');
+
+  function formatAge(age){
+    return age === 0 ? 'present day' : age.toFixed(1) + ' Mya';
+  }
+
+  function setFrame(d, idx){
+    const frame = d.frames[idx];
+    previewImage.innerHTML = '<img src="' + frame.img + '" alt="' + d.label + ' at ' + formatAge(frame.age) + '">';
+    previewIndex.textContent = d.label + ' · ' + formatAge(frame.age);
+    timeAge.textContent = formatAge(frame.age);
+  }
+
+  function show(n){
+    const d = nodeData[n];
+    if(!d) return;
+    previewTitle.innerHTML = d.label + '<span class="cursor"></span>';
+    previewSub.textContent = d.sub;
+    previewSub.style.fontStyle = d.italic ? 'italic' : 'normal';
+    previewDesc.textContent = d.caption;
+    hotspots.forEach(h => h.classList.toggle('active', h.dataset.node === String(n)));
+
+    if(d.frames && d.frames.length > 1){
+      timeSlider.classList.add('visible');
+      timeRange.max = d.frames.length - 1;
+      timeRange.value = 0;
+      timeRange.oninput = () => setFrame(d, parseInt(timeRange.value, 10));
+      setFrame(d, 0);
+    } else {
+      timeSlider.classList.remove('visible');
+      previewImage.innerHTML = '<img src="' + d.img + '" alt="Estimated range for ' + d.label + '">';
+      previewIndex.textContent = d.label + ' · ' + d.age;
+    }
+  }
+
+  hotspots.forEach(h => {
+    const n = h.dataset.node;
+    h.addEventListener('mouseenter', () => show(n));
+    h.addEventListener('focus', () => show(n));
+    h.addEventListener('click', () => show(n));
+  });
+</script>
+
+</body>
+</html>
