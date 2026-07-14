@@ -118,16 +118,3 @@ is used instead of the script failing.
    ordered by `age`.
 3. Re-run `python3 build_site.py`.
 
-## Deploying to GitHub Pages
-
-1. Push this folder to a GitHub repo (the generated `output/site.html`
-   doesn't need to be committed — you can regenerate it, or commit it and
-   rename it `index.html` for the simplest setup).
-2. In the repo: **Settings → Pages → Source**, pick the branch and folder
-   containing the HTML file, save.
-3. GitHub serves it at `https://<username>.github.io/<repo>/` within a
-   minute or two.
-
-## License
-
-
