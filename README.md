@@ -1,6 +1,6 @@
 # PhyGeo — Ancestral Range Explorer
 
-An interactive web figure for exploring the output of [PhyGeo] (https://github.com/js-arias/phygeo) ancestral-range
+An interactive web figure for exploring the output of [PhyGeo](https://github.com/js-arias/phygeo) ancestral-range
 reconstruction across a phylogeny (In this example that of girdled and plated
 lizards of Africa and Madagascar). The model is described in [Arias (2025)](https://doi.org/10.1093/sysbio/syae051).
 Instead of flipping between dozens of static map images, viewers hover or tap 
